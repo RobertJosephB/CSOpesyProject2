@@ -36,7 +36,7 @@ def green_fits():
 
     #simulates critical section execution
     sleep(0.5)
-    
+
     give_key()
     
     room.release()
@@ -46,7 +46,7 @@ def green_fits():
 def give_key():
     global ctr,blue_mutex,green_mutex
     global n,b,g
-    global blue_done,green_done,switch 
+    global blue_done,green_done,switch ,first
 
     #checks if there are more threads to be executed in both threads
     if blue_done != b and green_done!=g:
@@ -64,24 +64,28 @@ def give_key():
                 green_mutex.release()
         
                 blue_mutex.acquire()
+                
+            print("\nEmpty fitting room")
         else:
             ctr+=1
     #if blue is finished and has the key transfer it to green
     elif blue_done== b and blue_mutex.locked()==True:
-            ctr=1
+            ctr=-1
             blue_mutex.release()
                 
             green_mutex.acquire()
 
-            print("Empty fitting room")
-    #if green is finished and has the key transfer it to gblue
+            print("\nEmpty fitting room")
+            first=1
+    #if green is finished and has the key transfer it to blue
     elif green_done==g and green_mutex.locked()==True:
-            ctr=1
+            ctr=-1
             green_mutex.release()
         
             blue_mutex.acquire()
 
-            print("Empty fitting room")
+            print("\nEmpty fitting room")
+            first=1
     #if only one of the threads is executing just let it execute
     else:
         pass
@@ -103,7 +107,7 @@ global blue_done, green_done
 blue_done=0 
 green_done= 0
 
-global ctr,first
+global ctr,alone
 first=0
 ctr=0
 
@@ -121,7 +125,7 @@ green_mutex= Lock()
 #by default blue gets the mutex lock
 blue_mutex.acquire()
 
-#if number of green threads is larger than blue threads we prioritize the lower number of threads
+#if number of green threads is lower than blue threads we prioritize the lower number of threads
 if b>g:
     blue_mutex.release()
     green_mutex.acquire()
@@ -131,9 +135,13 @@ if b>g:
 
 for i in range(b+g):
     if blue_mutex.locked()==True:
-        if ctr==0 and first==0:
-            first=1
-            print("blue Only")
+        if ctr==0 or first==1 :
+            
+            print("\nBlue Only\n")
+
+            if first==1:
+                first=0
+
         
         blue= threading.Thread(target=blue_fits)
 
@@ -141,9 +149,13 @@ for i in range(b+g):
         blue.join()
         
     else:
-        if ctr==0 and first == 0:
-            first=1
-            print("Green Only")
+        if ctr==0 or first==1:
+
+            
+            print("\nGreen Only\n")
+
+            if first==1:
+                first=0
         
         green= threading.Thread(target=green_fits)
         green.start()
