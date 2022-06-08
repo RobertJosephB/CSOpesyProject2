@@ -1,10 +1,47 @@
 
 # library for threads for implementation
 
+from distutils.command.build_scripts import first_line_re
 from threading import *
 import threading
 
 from time import sleep
+
+
+
+def blue_fits():
+    global id , blue_done, room
+
+    room.acquire()
+    print("Blue Thread # "+ str(id))
+    
+    id+=1
+    blue_done+=1
+
+    #simulates critical section execution
+    sleep(0.5)
+
+    give_key()
+    
+    room.release()
+
+def green_fits():
+    global id , green_done, room
+
+    room.acquire()
+    print("Green Thread # "+ str(id))
+    
+    id+=1
+    green_done+=1
+
+    #simulates critical section execution
+    sleep(0.5)
+    
+    give_key()
+    
+    room.release()
+
+
 
 def give_key():
     global ctr,blue_mutex,green_mutex
@@ -50,60 +87,12 @@ def give_key():
         pass
 
 
-            
-            
-
-        
-            
-
-
-
-def blue_fits():
-    global id , blue_done, room
-
-    room.acquire()
-    print("Blue Thread # "+ str(id))
-    
-    id+=1
-    blue_done+=1
-
-    
-    give_key()
-    #simulates critical section execution
-    sleep(0.5)
-    room.release()
-
-def green_fits():
-    global id , green_done, room
-
-    room.acquire()
-    print("Green Thread # "+ str(id))
-    
-    id+=1
-    green_done+=1
-
-    
-    give_key()
-    #simulates critical section execution
-    sleep(0.5)
-    room.release()
-
-
-
-
-
-
 
 
 
 
 global n,b,g
 n,b,g=map(int, input("Enter n , b , g  values: ").split())
-
-
-print("number of available slots in fitting room: ", n)
-print("number of blue threads: ", b)
-print("number of green threads: " , g)
 
 global room
 # counting semaphore for the fitting rooms where only n number of same colored threads can enter
@@ -114,7 +103,8 @@ global blue_done, green_done
 blue_done=0 
 green_done= 0
 
-global ctr
+global ctr,first
+first=0
 ctr=0
 
 global id
@@ -131,8 +121,8 @@ green_mutex= Lock()
 #by default blue gets the mutex lock
 blue_mutex.acquire()
 
-#if number of green threads is larger than blue threads we prioritize green
-if g>b:
+#if number of green threads is larger than blue threads we prioritize the lower number of threads
+if b>g:
     blue_mutex.release()
     green_mutex.acquire()
 
@@ -141,7 +131,8 @@ if g>b:
 
 for i in range(b+g):
     if blue_mutex.locked()==True:
-        if ctr==0:
+        if ctr==0 and first==0:
+            first=1
             print("blue Only")
         
         blue= threading.Thread(target=blue_fits)
@@ -150,7 +141,8 @@ for i in range(b+g):
         blue.join()
         
     else:
-        if ctr==0:
+        if ctr==0 and first == 0:
+            first=1
             print("Green Only")
         
         green= threading.Thread(target=green_fits)
