@@ -48,8 +48,8 @@ def give_key():
 
     #checks if there are more threads to be executed in both threads
     if blue_done != b and green_done!=g:
-        if ctr==switch-1:
-            ctr=0
+        if ctr%switch==0:
+            ctr=1
             #if blue has key give to green
             if blue_mutex.locked()==True:
                 
@@ -109,10 +109,10 @@ green_done= 0
 
 global ctr,first
 first=0
-ctr=0
+ctr=1
 
 global id
-id=0
+id=1
 
 # variable used to let the system know it has reached a threshhold and must switch threads to avoid deadlock/starvation
 global switch 
@@ -134,8 +134,9 @@ if b>g:
 
 
 for i in range(1,b+g+1):
+    #If blue has key let it execute
     if blue_mutex.locked()==True:
-        if ctr==0 or first==1 :
+        if ctr==1 or first==1 :
             
             print("\nBlue Only\n")
 
@@ -147,9 +148,9 @@ for i in range(1,b+g+1):
 
         blue.start()
         blue.join()
-        
+    #else if green has the key let it execute    
     else:
-        if ctr==0 or first==1:
+        if ctr==1 or first==1:
 
             
             print("\nGreen Only\n")
