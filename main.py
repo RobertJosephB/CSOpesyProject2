@@ -1,7 +1,5 @@
 
 # library for threads for implementation
-
-from distutils.command.build_scripts import first_line_re
 from threading import *
 import threading
 
@@ -50,7 +48,7 @@ def give_key():
 
     #checks if there are more threads to be executed in both threads
     if blue_done != b and green_done!=g:
-        if ctr==switch:
+        if ctr==switch-1:
             ctr=0
             #if blue has key give to green
             if blue_mutex.locked()==True:
@@ -76,6 +74,7 @@ def give_key():
             green_mutex.acquire()
 
             print("\nEmpty fitting room")
+            #signal that the first will be blue
             first=1
     #if green is finished and has the key transfer it to blue
     elif green_done==g and green_mutex.locked()==True:
@@ -85,6 +84,7 @@ def give_key():
             blue_mutex.acquire()
 
             print("\nEmpty fitting room")
+            #signal that the first will be green
             first=1
     #if only one of the threads is executing just let it execute
     else:
@@ -107,7 +107,7 @@ global blue_done, green_done
 blue_done=0 
 green_done= 0
 
-global ctr,alone
+global ctr,first
 first=0
 ctr=0
 
@@ -133,7 +133,7 @@ if b>g:
 
 
 
-for i in range(b+g):
+for i in range(1,b+g+1):
     if blue_mutex.locked()==True:
         if ctr==0 or first==1 :
             
