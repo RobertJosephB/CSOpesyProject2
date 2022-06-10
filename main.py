@@ -7,14 +7,21 @@ from time import sleep
 
 
 
-def blue_fits():
-    global id , blue_done, room
+def fits():
+    global id , blue_done, room, green_done,blue_mutex,green_mutex
+
+    
 
     room.acquire()
-    print("Blue Thread # "+ str(id))
+    if  blue_mutex.locked()==True:
+        print("Blue Thread # "+ str(id))
+        blue_done+=1
+    else:
+        print("Green Thread # "+ str(id))
+        green_done+=1
     
     id+=1
-    blue_done+=1
+    
 
     #simulates critical section execution
     sleep(0.5)
@@ -23,21 +30,21 @@ def blue_fits():
     
     room.release()
 
-def green_fits():
-    global id , green_done, room
+# def green_fits():
+#     global id , green_done, room
 
-    room.acquire()
-    print("Green Thread # "+ str(id))
+#     room.acquire()
+#     print("Green Thread # "+ str(id))
     
-    id+=1
-    green_done+=1
+#     id+=1
+#     green_done+=1
 
-    #simulates critical section execution
-    sleep(0.5)
+#     #simulates critical section execution
+#     sleep(0.5)
 
-    give_key()
+#     give_key()
     
-    room.release()
+#     room.release()
 
 
 
@@ -144,7 +151,7 @@ for i in range(1,b+g+1):
                 first=0
 
         
-        blue= threading.Thread(target=blue_fits)
+        blue= threading.Thread(target=fits)
 
         blue.start()
         blue.join()
@@ -158,7 +165,7 @@ for i in range(1,b+g+1):
             if first==1:
                 first=0
         
-        green= threading.Thread(target=green_fits)
+        green= threading.Thread(target=fits)
         green.start()
         green.join()
         
