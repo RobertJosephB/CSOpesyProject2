@@ -13,6 +13,7 @@ def fits():
     
 
     room.acquire()
+    #check which has the key and increase ctr for that color
     if  blue_mutex.locked()==True:
         print("Blue Thread # "+ str(id))
         blue_done+=1
@@ -30,21 +31,6 @@ def fits():
     
     room.release()
 
-# def green_fits():
-#     global id , green_done, room
-
-#     room.acquire()
-#     print("Green Thread # "+ str(id))
-    
-#     id+=1
-#     green_done+=1
-
-#     #simulates critical section execution
-#     sleep(0.5)
-
-#     give_key()
-    
-#     room.release()
 
 
 
@@ -124,6 +110,7 @@ id=1
 # variable used to let the system know it has reached a threshhold and must switch threads to avoid deadlock/starvation
 global switch 
 switch = n+3
+
 #mutex locks used to get into the semaphore
 global blue_mutex,green_mutex
 blue_mutex= Lock()
