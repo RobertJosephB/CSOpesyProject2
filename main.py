@@ -25,7 +25,7 @@ def fits():
     
 
     #simulates critical section execution
-    sleep(0.5)
+    sleep(1)
 
     give_key()
     
@@ -109,7 +109,7 @@ id=1
 
 # variable used to let the system know it has reached a threshhold and must switch threads to avoid deadlock/starvation
 global switch 
-switch = n+3
+switch = n
 
 #mutex locks used to get into the semaphore
 global blue_mutex,green_mutex
