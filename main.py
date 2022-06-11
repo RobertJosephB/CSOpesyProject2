@@ -5,84 +5,128 @@ import threading
 
 from time import sleep
 
-
-
-def fits():
-    global id , blue_done, room, green_done,blue_mutex,green_mutex
-
-    
-
-    room.acquire()
-    #check which has the key and increase ctr for that color
-    if  blue_mutex.locked()==True:
-        print("Blue Thread # "+ str(id))
-        blue_done+=1
-    else:
-        print("Green Thread # "+ str(id))
-        green_done+=1
-    
-    id+=1
-    
-
-    #simulates critical section execution
-    sleep(1)
-
-    give_key()
-    
-    room.release()
-
-
-
-
-def give_key():
-    global ctr,blue_mutex,green_mutex
+def fit_roomg():
+    global id,ctr,blue_mutex,green_mutex,room
     global n,b,g
     global blue_done,green_done,switch ,first
+   
+    print("\nGreen Thread # "+ str(id))
+    green_done+=1
+    id+=1
+    sleep(3)
+    room.release()
+    if room._value == n:
+        print("\nEmpty fitting room")
+    pass
+    
+def fit_roomb():
+    global id,ctr,blue_mutex,green_mutex,room
+    global n,b,g
+    global blue_done,green_done,switch ,first
+   
+    
+    print("\nBlue Thread # "+ str(id))
+    blue_done+=1
 
-    #checks if there are more threads to be executed in both threads
-    if blue_done != b and green_done!=g:
-        if ctr%switch==0:
-            ctr=1
-            #if blue has key give to green
-            if blue_mutex.locked()==True:
-                
-                blue_mutex.release()
-                
-                green_mutex.acquire()
-            # otherwise green gives to blue
-            else:
-                
-                green_mutex.release()
+    id+=1
+    #simulates critical section execution
+    sleep(3)
+    room.release()
+    if room._value == n:
+        print("\nEmpty fitting room")
+    pass
+
+
+
+def green_func():
+    global id,blue_mutex,green_mutex,mtx
+    global n,b,g
+    global blue_done,green_done,switch ,first
+    ctr = 0
+    while green_done!=g:
+
+        mtx.acquire()
         
-                blue_mutex.acquire()
-                
-            print("\nEmpty fitting room")
-        else:
-            ctr+=1
-    #if blue is finished and has the key transfer it to green
-    elif blue_done== b and blue_mutex.locked()==True:
-            ctr=-1
-            blue_mutex.release()
-                
-            green_mutex.acquire()
-
-            print("\nEmpty fitting room")
-            #signal that the first will be blue
-            first=1
-    #if green is finished and has the key transfer it to blue
-    elif green_done==g and green_mutex.locked()==True:
-            ctr=-1
-            green_mutex.release()
         
-            blue_mutex.acquire()
+        #check which has the key and increase ctr for that color
+        temp = 1;
+        while temp == 1:
+            room.acquire()
+            Thread(target = fit_roomg).start()
+            sleep(1)
+            
+        
+            
 
-            print("\nEmpty fitting room")
-            #signal that the first will be green
-            first=1
-    #if only one of the threads is executing just let it execute
-    else:
-        pass
-
+            if green_done != g:
+                if ctr==switch-1:
+                        
+                        while room._value != n:
+                            pass
+                        mtx.release()
+                        sleep(1)
+                        temp = 0
+                        ctr = 0
+                        
+                        
+                        
+                else:
+                    ctr+=1
+            else :
+                    ctr=0
+                    
+                    while room._value != n:
+                        pass
+                    mtx.release()
+                    sleep(1)
+                    temp = 0
+                    
+ 
+    pass
+                
+    
+        
+def blue_func():
+    global id,blue_mutex,green_mutex
+    global n,b,g
+    global blue_done,green_done,switch ,first
+    ctr = 0
+    while blue_done!=b:
+        mtx.acquire()
+        
+    
+    
+        #check which has the key and increase ctr for that color
+        
+        temp = 1;
+        while temp == 1:
+            room.acquire()
+            Thread(target = fit_roomb).start()
+            sleep(1)
+            
+            
+            
+            if blue_done != b:
+                if ctr==switch-1:
+                        while room._value != n:
+                            pass
+                        mtx.release()
+                        
+                        temp = 0
+                        ctr = 0
+                        
+                else:
+                    ctr+=1
+            elif blue_done==b:
+                ctr=0
+                while room._value != n:
+                            pass
+                mtx.release()
+                temp = 0
+                
+ 
+    pass
+            
 
 
 
@@ -100,9 +144,7 @@ global blue_done, green_done
 blue_done=0 
 green_done= 0
 
-global ctr,first
-first=0
-ctr=1
+
 
 global id
 id=1
@@ -112,61 +154,16 @@ global switch
 switch = n
 
 #mutex locks used to get into the semaphore
-global blue_mutex,green_mutex
-blue_mutex= Lock()
-green_mutex= Lock()
+global mtx
+mtx= Lock()
 
-#by default blue gets the mutex lock
-blue_mutex.acquire()
 
 #if number of green threads is lower than blue threads we prioritize the lower number of threads
-if b>g:
-    blue_mutex.release()
-    green_mutex.acquire()
 
+green = Thread(target = green_func)
 
+blue = Thread(target = blue_func)
 
-
-for i in range(1,b+g+1):
-    #If blue has key let it execute
-    if blue_mutex.locked()==True:
-        if ctr==1 or first==1 :
-            
-            print("\nBlue Only\n")
-
-            if first==1:
-                first=0
-
-        
-        blue= threading.Thread(target=fits)
-
-        blue.start()
-        blue.join()
-    #else if green has the key let it execute    
-    else:
-        if ctr==1 or first==1:
-
-            
-            print("\nGreen Only\n")
-
-            if first==1:
-                first=0
-        
-        green= threading.Thread(target=fits)
-        green.start()
-        green.join()
-        
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
+green.start()
+sleep(1)
+blue.start()
