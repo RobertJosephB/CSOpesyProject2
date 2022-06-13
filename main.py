@@ -46,7 +46,7 @@ def green_func():
     while green_done!=g:
 
         mtx.acquire()
-        
+        print("Green Acquired")
         
         #check which has the key and increase ctr for that color
         temp = 1;
@@ -93,7 +93,7 @@ def blue_func():
     ctr = 0
     while blue_done!=b:
         mtx.acquire()
-        
+        print("Blue Acquired")
     
     
         #check which has the key and increase ctr for that color
@@ -167,3 +167,23 @@ blue = Thread(target = blue_func)
 green.start()
 sleep(1)
 blue.start()
+    
+
+
+
+    
+    
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
