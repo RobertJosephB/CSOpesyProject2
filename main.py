@@ -53,7 +53,7 @@ def green_func():
     while green_done!=g:
         #Tries to acquire mutex, if other function is is using mutex, waits
         mtx.acquire()
-        print("Green Acquired")
+        print("Green Only")
         
        
         temp = 1;
@@ -106,7 +106,7 @@ def blue_func():
     while blue_done!=b:
         #Tries to acquire mutex, if other function is is using mutex, waits
         mtx.acquire()
-        print("Blue Acquired")
+        print("Blue Only")
     
     
         
